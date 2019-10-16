@@ -4,7 +4,7 @@ defmodule Mete.Protocol do
   @type tag :: {atom(), String.t()}
   # @type tag :: {String.t() | atom(), String.t()}
   # @type tag_set :: list(tag)
-  @type tag_set :: keyword(String.t() | atom())
+  @type tag_set :: keyword(value)
 
   @type value :: float | integer | boolean | String.t()
   @type field :: {String.t() | atom(), value}
@@ -51,8 +51,21 @@ defmodule Mete.Protocol do
     []
   end
 
-  def encode_tags([{key, value} | rest]) do
+  def encode_tags([{key, value} | rest]) when is_binary(value) or is_atom(value) do
     [?,, escape_string(key), ?=, escape_string(value) | encode_tags(rest)]
+  end
+
+  def encode_tags([{key, value} | rest]) do
+    cond do
+      is_integer(value) ->
+        [?,, escape_string(key), ?=, Integer.to_string(value) | encode_tags(rest)]
+
+      is_float(value) ->
+        [?,, escape_string(key), ?=, :io_lib_format.fwrite_g(value) | encode_tags(rest)]
+
+      true ->
+        encode_tags(rest)
+    end
   end
 
   @spec encode_fields(field_set) :: iodata
