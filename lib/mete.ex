@@ -76,7 +76,7 @@ defmodule Mete do
       iex> measure("query", fn -> "some query result" end)
       "some query result"
   """
-  def measure(measurement, tags, fields \\ [], func) when is_function(func, 0) do
+  def measure(measurement, tags \\ [], fields \\ [], func) when is_function(func, 0) do
     {value, result} = :timer.tc(func)
     __write__(measurement, tags, [{:value, value} | fields], nil)
     result
