@@ -1,4 +1,5 @@
 defmodule Mete.Connection do
+  @moduledoc false
   use GenServer
 
   require Logger
@@ -29,12 +30,10 @@ defmodule Mete.Connection do
   end
 
   def init(args) do
-    Application.get_all_env(:mete)
-
     config =
       Keyword.merge(
         @default_conf,
-        Keyword.merge(Application.get_env(:mete, __MODULE__, []), args)
+        Keyword.merge(Application.get_all_env(:mete), args)
       )
 
     state = %__MODULE__{
@@ -45,6 +44,9 @@ defmodule Mete.Connection do
       # timestamp: Keyword.get(config, :timestamp),
       tags: Keyword.get(config, :tags)
     }
+
+    require Logger
+    Logger.info(["Started Mete with:\n\n", inspect(state, pretty: true)])
 
     case spawn_conn(state) do
       {:error, reason} ->

@@ -1,4 +1,5 @@
 defmodule Mete.Protocol do
+  @moduledoc false
   @type measurement :: String.t() | atom()
 
   @type tag :: {atom(), String.t()}

@@ -1,4 +1,5 @@
 defmodule Mete.Utils do
+  @moduledoc false
   def into_tags([], tags), do: tags
   def into_tags(keyword, tags), do: into_tags(keyword, [], tags)
 
