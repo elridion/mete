@@ -8,7 +8,8 @@ defmodule Mete.Protocol do
   @type tag_set :: keyword(value)
 
   @type value :: float | integer | boolean | String.t()
-  @type field :: {String.t() | atom(), value}
+  @type field_key :: String.t() | atom()
+  @type field :: {field_key, value}
   @type field_set :: nonempty_list(field)
 
   @type timestamp :: -9_223_372_036_854_775_806..9_223_372_036_854_775_806

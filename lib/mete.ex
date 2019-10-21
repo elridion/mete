@@ -41,9 +41,12 @@ defmodule Mete do
   - Configurable handling of timestamps
   - Support for mfa's for measure.
   """
-  alias Mete.Protocol
+  import Mete.Utils
+  # , only: [into_tags: 2, into_tags: 3]
 
-  import Mete.Utils, only: [into_tags: 2, into_tags: 3]
+  require Logger
+
+  alias Mete.Protocol
 
   @type measurement :: Protocol.measurement()
   @type tags :: Protocol.tag_set()
@@ -52,6 +55,7 @@ defmodule Mete do
   @type timestamp :: Protocol.timestamp()
 
   @tags :__mete_tags__
+  @measure_points :__mete_measuring_points__
 
   @spec write(measurement, tags, fields | value) :: :ok
   @doc """
@@ -80,6 +84,37 @@ defmodule Mete do
     {value, result} = :timer.tc(func)
     __write__(measurement, tags, [{:value, value} | fields], nil)
     result
+  end
+
+  @doc """
+  Adds a meter point under the given atom to the process.
+  """
+  def meter(field) do
+    measure_points =
+      @measure_points
+      |> Process.get([])
+      |> Keyword.merge([{field, timestamp()}])
+
+    Process.put(@measure_points, measure_points)
+    :ok
+  end
+
+  @doc """
+  Calculates the delta for the process meter points and writes them under the measurement.
+  """
+  def write_meter(measurement, tags \\ []) do
+    timestamp = timestamp()
+
+    case Process.get(@measure_points) do
+      nil ->
+        Logger.warn(["No meter points found for ", inspect(measurement)])
+
+      meter_points ->
+        Process.put(@measure_points, [])
+        delta = Enum.map(meter_points, fn {key, value} -> {key, timestamp - value} end)
+
+        __write__(measurement, tags, delta, timestamp)
+    end
   end
 
   @spec __write__(measurement, tags, fields, timestamp | nil) :: :ok | :error
