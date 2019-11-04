@@ -13,7 +13,8 @@ defmodule Mete.Connection do
     :conn,
     :database,
     # :timestamp,
-    :tags
+    :tags,
+    :path
   ]
 
   @default_conf [
@@ -77,14 +78,28 @@ defmodule Mete.Connection do
   def spawn_conn(:http, %{host: host, port: port, database: db}) do
     :inets.start()
 
-    {:http,
-     {List.flatten([
-        'http://',
-        convert_to_charlist(host),
-        ?:,
-        Integer.to_charlist(port),
-        '/write'
-      ]), %{"db" => db}}}
+    uri =
+      host
+      |> URI.parse()
+      |> Map.put(:port, port)
+      |> Map.update(:scheme, nil, &(&1 || :http))
+      |> Map.update(:path, nil, fn path ->
+        cond do
+          String.ends_with?(path, "/write") ->
+            path
+
+          String.ends_with?(path, "/") ->
+            path <> "write"
+
+          true ->
+            path <> "/write"
+        end
+      end)
+      |> Map.put(:query, URI.encode_query(%{"db" => db}))
+      |> URI.to_string()
+      |> String.to_charlist()
+
+    {:http, uri}
   end
 
   def spawn_conn(:udp, %{host: host, port: port}) do
@@ -117,12 +132,10 @@ defmodule Mete.Connection do
     :gen_udp.send(socket, host, port, payload)
   end
 
-  def transmit(payload, {:http, {url, params}}) do
+  def transmit(payload, {:http, uri}) do
     import IO, only: [iodata_to_binary: 1]
 
-    url = List.flatten([url, ??, String.to_charlist(URI.encode_query(params))])
-
-    :httpc.request(:post, {url, [], 'text-plain', iodata_to_binary(payload)}, [], [])
+    :httpc.request(:post, {uri, [], 'text-plain', iodata_to_binary(payload)}, [], [])
   end
 
   def transmit(_payload, :error) do
