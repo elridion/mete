@@ -2,12 +2,12 @@ defmodule Mete.Protocol do
   @moduledoc false
   @type measurement :: String.t() | atom()
 
-  @type tag :: {atom(), String.t()}
+  # @type tag :: {atom(), String.t() | atom()}
   # @type tag :: {String.t() | atom(), String.t()}
   # @type tag_set :: list(tag)
   @type tag_set :: keyword(value)
 
-  @type value :: float | integer | boolean | String.t()
+  @type value :: float | integer | boolean | String.t() | atom()
   @type field_key :: String.t() | atom()
   @type field :: {field_key, value}
   @type field_set :: nonempty_list(field)
