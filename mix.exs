@@ -1,7 +1,7 @@
 defmodule Mete.MixProject do
   use Mix.Project
 
-  @version "0.1.5"
+  @version "1.0.0-rc.0"
 
   def project do
     [
@@ -12,7 +12,8 @@ defmodule Mete.MixProject do
       description: description(),
       package: package(),
       deps: deps(),
-      docs: docs()
+      docs: docs(),
+      dialyzer: [plt_add_apps: [:mix]]
       # elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
@@ -28,7 +29,8 @@ defmodule Mete.MixProject do
 
   defp deps do
     [
-      {:ex_doc, "~> 0.20", only: :dev}
+      {:ex_doc, "~> 0.20", only: :dev},
+      {:credo, "~> 1.2", only: :dev}
     ]
   end
 
@@ -48,7 +50,7 @@ defmodule Mete.MixProject do
     [
       maintainers: ["Hans Bernhard Gödeke"],
       files: ~w(lib .formatter.exs mix.exs README* LICENSE),
-      licenses: ["GNU GPLv3"],
+      licenses: ["GPL-3.0-only"],
       links: %{
         "GitHub" => "https://github.com/elridion/mete"
       }
