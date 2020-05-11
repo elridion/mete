@@ -1,5 +1,7 @@
 # Mete
-\[_/miːt/_\] - Old English metan 'measure'
+\[_/miːt/_\] - Old English metan 'measure' 
+
+<a href="https://frobese.io/" target="_blank"><img src="images/banner-frobeseio.png" alt="frobese.io logo" width="250"/></a>
 
 Basic measuring tool and telemetry writer using InfluxDB.  
 Documentation is available on [hex.pm](https://hexdocs.pm/mete)
