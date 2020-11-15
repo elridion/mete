@@ -131,11 +131,11 @@ defmodule Mete.Connection do
     spawn_conn(protocol, state)
   end
 
-  def spawn_conn(:http, %{datanase: nil}) do
+  def spawn_conn(:http, %__MODULE__{database: nil}) do
     {:error, "http requires a database"}
   end
 
-  def spawn_conn(:http, %{host: host, port: port, database: db}) do
+  def spawn_conn(:http, %__MODULE__{host: host, port: port, database: db}) do
     :inets.start()
 
     uri =
@@ -162,7 +162,7 @@ defmodule Mete.Connection do
     {:http, uri}
   end
 
-  def spawn_conn(:udp, %{host: host, port: port}) do
+  def spawn_conn(:udp, %__MODULE__{host: host, port: port}) do
     case :gen_udp.open(0, [:binary, active: true]) do
       {:ok, socket} ->
         # TODO: use udp buffer for batch buffer
