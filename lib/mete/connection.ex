@@ -4,7 +4,6 @@ defmodule Mete.Connection do
 
   require Logger
 
-  import Mete.Protocol
   import IO, only: [iodata_length: 1]
 
   defstruct [
