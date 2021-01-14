@@ -141,7 +141,7 @@ defmodule Mete.Connection do
       host
       |> URI.parse()
       |> Map.put(:port, port)
-      |> Map.update(:scheme, nil, &(&1 || :http))
+      |> Map.update(:scheme, nil, &(&1 || "http"))
       |> Map.update(:path, nil, fn path ->
         cond do
           String.ends_with?(path, "/write") ->
