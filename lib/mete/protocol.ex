@@ -1,11 +1,14 @@
 defmodule Mete.Protocol do
-  @moduledoc false
+  @moduledoc """
+  Implementation of the [InfluxDB line protocol](https://docs.influxdata.com/influxdb/v1.8/write_protocols/line_protocol_reference/).
+  """
   @type measurement :: String.t() | atom()
 
   # @type tag :: {atom(), String.t() | atom()}
   # @type tag :: {String.t() | atom(), String.t()}
   # @type tag_set :: list(tag)
-  @type tag_set :: keyword(value)
+  @type type_value :: String.t() | atom()
+  @type tag_set :: keyword(type_value())
 
   @type value :: float | integer | boolean | String.t() | atom()
   @type field_key :: String.t() | atom()
@@ -13,6 +16,7 @@ defmodule Mete.Protocol do
   @type field_set :: nonempty_list(field)
 
   @type timestamp :: -9_223_372_036_854_775_806..9_223_372_036_854_775_806
+
   # @type point :: {measurement, tag_set, field_set, timestamp}
 
   @default_escapes [?,, ?=, ?\s]
@@ -20,11 +24,13 @@ defmodule Mete.Protocol do
   @field_value_escapes [?"]
 
   # <measurement>[,<tag_key>=<tag_value>[,<tag_key>=<tag_value>]] <field_key>=<field_value>[,<field_key>=<field_value>] [<timestamp>]
+  @doc false
   @spec encode({measurement, tag_set, field_set, timestamp | nil}) :: iodata
   def encode({measurement, tags, fields, timestamp}) do
     encode(measurement, tags, fields, timestamp)
   end
 
+  @doc false
   @spec encode(measurement, tag_set, field_set) :: iodata
   def encode(measurement, tags, fields) do
     [
@@ -35,6 +41,7 @@ defmodule Mete.Protocol do
     ]
   end
 
+  @doc false
   @spec encode(measurement, tag_set, field_set, timestamp | nil) :: iodata
   def encode(measurement, tags, fields, nil) do
     encode(measurement, tags, fields)
@@ -48,6 +55,7 @@ defmodule Mete.Protocol do
     ]
   end
 
+  @doc false
   @spec encode_tags(tags :: tag_set) :: iodata
   def encode_tags([]) do
     []
@@ -127,8 +135,8 @@ defmodule Mete.Protocol do
     escape_string(string, [], string, 0, 0, escape)
   end
 
+  @doc false
   @spec escape_string(String.t(), list(), String.t(), integer, integer, list) :: iodata
-
   def escape_string(<<char::utf8, rest::binary>>, acc, original, skip, length, escape) do
     cond do
       char in escape ->

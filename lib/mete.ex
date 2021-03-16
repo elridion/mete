@@ -30,6 +30,7 @@ defmodule Mete do
   - base default batch size on connection parameters
   """
   import Mete.Utils
+
   # , only: [into_tags: 2, into_tags: 3]
 
   require Logger
@@ -45,12 +46,35 @@ defmodule Mete do
   @tags :__mete_tags__
   @measure_points :__mete_measuring_points__
 
-  @spec write(measurement, tags, fields | value) :: :ok
   @doc """
-  Writes a measurement.
+  Writes a single measurement.
+  A measurement consists of a measurement, tags and fields.
 
-      write("query", [exec: 20, queue: 33])
+  Requires a name of the measurement either as a string or atom.
+  Atoms are always converted to strings.
+  Tags can be given either as a keyword list of strings or atoms, or tuple lists with string keys.
+
+  Fields can be either atoms, strings, boolean, integer, or floats.
+  If measurements are not known to influx the according table will be created or altered.
+  If a field should change its value from integer or float (or any other type) for some reason this will lead to datalos since the new fields wont match the present table.
+
+  ### Examples:
+
+      iex> write("temp", [region: "EU", foo: "bar"], c: 42.0, f: 107.6)
+      :ok
+
+  If the value is without a name it defaults to `:value` thus ...
+
+      iex> write("temp", 42)
+      :ok
+
+  is equivalent to ...
+
+      iex> write("temp", value: 42)
+      :ok
+
   """
+  @spec write(measurement, tags, fields | value) :: :ok
   def write(measurement, tags \\ [], fields)
 
   def write(measurement, tags, fields) when is_list(fields) do
@@ -61,13 +85,13 @@ defmodule Mete do
     __write__(measurement, tags, [{:value, value}], nil)
   end
 
-  @spec measure(measurement, tags, list(Protocol.field()), (() -> any())) :: any()
   @doc """
   Evaluates the given function, measures, and subsequently writes the elapsed real time.
 
       iex> measure("query", fn -> "some query result" end)
       "some query result"
   """
+  @spec measure(measurement, tags, fields, (() -> any())) :: any()
   def measure(measurement, tags \\ [], fields \\ [], func) when is_function(func, 0) do
     {value, result} = :timer.tc(func)
     __write__(measurement, tags, [{:value, value} | fields], nil)
@@ -105,20 +129,6 @@ defmodule Mete do
     end
   end
 
-  @spec __write__(measurement, tags, fields, timestamp | nil) :: :ok | :error
-  defp __write__(measurement, tags, fields, timestamp) do
-    case __tags__() do
-      {true, p_tags} ->
-        GenServer.cast(
-          __MODULE__,
-          {:write, {measurement, into_tags(tags, p_tags), fields, timestamp || timestamp()}}
-        )
-
-      _ ->
-        :error
-    end
-  end
-
   @doc """
   Alters the current process tags according the given keyword list.
 
@@ -147,6 +157,20 @@ defmodule Mete do
 
   defp timestamp do
     :os.system_time(:nanosecond)
+  end
+
+  @spec __write__(measurement, tags, fields, timestamp | nil) :: :ok | :error
+  defp __write__(measurement, tags, fields, timestamp) do
+    case __tags__() do
+      {true, p_tags} ->
+        GenServer.cast(
+          __MODULE__,
+          {:write, {measurement, into_tags(tags, p_tags), fields, timestamp || timestamp()}}
+        )
+
+      _ ->
+        :error
+    end
   end
 
   # @unix_epoch 62_167_219_200
