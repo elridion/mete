@@ -97,6 +97,8 @@ defmodule Mete.Connection do
 
   @impl true
   def handle_info(:"$mete_flush", state) do
+    # check if there are messages in the queue
+    # if so we don't have to flush by hand
     case Process.info(self(), :message_queue_len) do
       {:message_queue_len, 0} ->
         {:noreply, flush(state)}
@@ -105,6 +107,8 @@ defmodule Mete.Connection do
         {:noreply, state}
     end
   after
+    # unless this batch was configured to be nil from the beginning
+    # this schedules a new flush
     unless is_nil(state.batch), do: schedule_flush()
   end
 
