@@ -1,8 +1,6 @@
 # Mete
 \[_/miːt/_\] - Old English metan 'measure' 
 
-<a href="https://frobese.io/" target="_blank"><img src="images/banner-frobeseio.png" alt="frobese.io logo" width="250"/></a>
-
 Basic measuring tool and telemetry writer using InfluxDB.  
 Documentation is available on [hex.pm](https://hexdocs.pm/mete)
 ## Installation
@@ -31,3 +29,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+## Support
+<a href="https://frobese.io/" target="_blank"><img src="images/banner-frobeseio.png" alt="frobese.io logo" width="250"/></a>
