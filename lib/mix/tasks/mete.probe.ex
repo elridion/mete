@@ -23,6 +23,7 @@ defmodule Mix.Tasks.Mete.Probe do
 
       memory()
       cpu()
+      mete()
 
       {:noreply, interval}
     end
@@ -47,6 +48,19 @@ defmodule Mix.Tasks.Mete.Probe do
             :ok
         end
       end)
+    end
+
+    def mete do
+      pid = GenServer.whereis(Mete)
+
+      if is_pid(pid) do
+        values =
+          pid
+          |> Process.info()
+          |> Keyword.take([:heap_size, :stack_size])
+
+        Mete.write("mete", values)
+      end
     end
   end
 
