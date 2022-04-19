@@ -5,18 +5,45 @@ defmodule Mete.Connection.Httpc do
 
   alias Mete.Config
 
-  defstruct [:uri]
+  defstruct [
+    :token,
+    :uri,
+    :influx_version
+  ]
 
   @impl true
-  def init(%Config{} = config) do
-    uri = Config.uri(config)
+  def init(%Config{influx_version: 1} = config) do
+    if is_binary(config.database) do
+      uri = Config.uri(config)
 
-    {:ok, %__MODULE__{uri: uri}}
+      {:ok, %__MODULE__{influx_version: 1, uri: uri}}
+    else
+      {:error, :database_missing}
+    end
+  end
+
+  def init(%Config{influx_version: 2} = config) do
+    if is_binary(config.bucket) and is_binary(config.organisation) and is_binary(config.token) do
+      uri = Config.uri(config)
+
+      {:ok, %__MODULE__{influx_version: 2, uri: uri, token: "Token #{config.token}"}}
+    else
+      {:error, :database_missing}
+    end
   end
 
   @impl true
-  def transmit(payload, %__MODULE__{uri: uri}) do
-    :httpc.request(:post, {uri, [], 'text-plain', iodata_to_binary(payload)}, [], [])
+  def transmit(payload, %__MODULE__{uri: uri, token: token}) do
+    body = iodata_to_binary(payload)
+
+    headers =
+      if is_binary(token) do
+        [{'Authorization', token}]
+      else
+        []
+      end
+
+    :httpc.request(:post, {uri, headers, 'text-plain; charset=utf-8', body}, [], [])
   end
 
   @impl true

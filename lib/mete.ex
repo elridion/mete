@@ -19,9 +19,28 @@ defmodule Mete do
   - `:host` - hostname of the server running the InfluxDB endpoint, defaults to `localhost`
   - `:port` - port on which the InfluxDB server runs the respective input, defaults to `8089`
   - `:protocol` - either `:udp`, or `:http`.  Defaults to `:udp`.
-  - `:database` - has to be configured when using `:http`
   - `:tags` - can be used to configure application-wide tags expects a Keywordlist of strings or atoms, defaults to `[]`
   - `:batch` - InfluxDB supports batching measurements, can be deactivated with `false` activated with `true` or directly configure the byte-size of the payloads with an integer
+  - `:database` - has to be configured when using `:http` (InfluxDB v1)
+  - `:bucket` - bucket id for your target bucket (InfluxDB v2)
+  - `:organistaion` - your organisation id (InfluxDB v2)
+  - `:token` - your access token (InfluxDB v2)
+
+  ### Example for InfluxDB v2
+  ```
+    config :mete,
+      influx_version: 2
+      organisation: "ORGANISATION-ID",
+      host: "some-cloud.influxdata.com",
+      bucket: "BUCKET-ID",
+      token: "YOUR-TOKEN",
+      batch: 10_000
+      path: "/api/v2/write",
+      port: nil,
+      protocol: :http,
+      scheme: "https",
+  ```
+
 
   ## ToDo
   - Configurable handling of integer/float values.

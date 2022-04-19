@@ -2,7 +2,10 @@ defmodule Mete.Config do
   @moduledoc false
 
   defstruct [
+    :bucket,
     :database,
+    :organisation,
+    :token,
     batch: true,
     host: "localhost",
     influx_version: 1,
@@ -20,8 +23,7 @@ defmodule Mete.Config do
   end
 
   def config(args) do
-    config()
-    |> struct(args)
+    struct(config(), args)
   end
 
   ##  Callbacks
