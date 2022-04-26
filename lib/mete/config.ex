@@ -53,6 +53,19 @@ defmodule Mete.Config do
     |> URI.to_string()
   end
 
+  def uri(%__MODULE__{influx_version: 2} = config) do
+    query = %{"bucket" => config.bucket, "org" => config.organisation, "precision" => "ns"}
+
+    %URI{
+      host: config.host,
+      path: config.path,
+      port: config.port,
+      scheme: config.scheme
+    }
+    |> Map.put(:query, URI.encode_query(query))
+    |> URI.to_string()
+  end
+
   def adapter_module(protocol)
 
   def adapter_module(:udp), do: Mete.Connection.Udp
