@@ -1,7 +1,7 @@
 defmodule Mete.MixProject do
   use Mix.Project
 
-  @version "2.0.1"
+  @version "2.0.2"
 
   def project do
     [
@@ -29,6 +29,7 @@ defmodule Mete.MixProject do
 
   defp deps do
     [
+      {:hackney, "~> 1.18", optional: true},
       {:ex_doc, "~> 0.20", only: :dev},
       {:credo, "~> 1.2", only: :dev}
     ]

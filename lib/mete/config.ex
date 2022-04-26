@@ -72,5 +72,11 @@ defmodule Mete.Config do
 
   def adapter_module(:http), do: Mete.Connection.Httpc
 
+  def adapter_module(:httpc), do: Mete.Connection.Httpc
+
+  if Code.ensure_loaded?(:hackney) do
+    def adapter_module(:hackney), do: Mete.Connection.Hackney
+  end
+
   def adapter_module(module), do: module
 end
