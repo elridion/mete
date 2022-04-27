@@ -21,6 +21,7 @@ defmodule Mete do
   - `:protocol` - either `:udp`, or `:http`.  Defaults to `:udp`.
   - `:tags` - can be used to configure application-wide tags expects a Keywordlist of strings or atoms, defaults to `[]`
   - `:batch` - InfluxDB supports batching measurements, can be deactivated with `false` activated with `true` or directly configure the byte-size of the payloads with an integer
+  - `:compression` - defaults to `nil` and can be set to `:gzip` only for http
   - `:database` - has to be configured when using `:http` (InfluxDB v1)
   - `:bucket` - bucket id for your target bucket (InfluxDB v2)
   - `:organistaion` - your organisation id (InfluxDB v2)
@@ -182,10 +183,18 @@ defmodule Mete do
   defp __write__(measurement, tags, fields, timestamp) do
     case __tags__() do
       {true, p_tags} ->
-        GenServer.cast(
-          __MODULE__,
-          {:write, {measurement, into_tags(tags, p_tags), fields, timestamp || timestamp()}}
-        )
+        case :ets.tab2list(Mete) do
+          [] ->
+            :error
+
+          connections ->
+            {pid} = Enum.random(connections)
+
+            GenServer.cast(
+              pid,
+              {:write, {measurement, into_tags(tags, p_tags), fields, timestamp || timestamp()}}
+            )
+        end
 
       _ ->
         :error

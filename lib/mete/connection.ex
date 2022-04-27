@@ -29,7 +29,16 @@ defmodule Mete.Connection do
   # ]
 
   def start_link(args) do
-    GenServer.start_link(__MODULE__, args, name: Mete, spawn_opt: [fullsweep_after: 50])
+    # GenServer.start_link(__MODULE__, args, name: Mete, spawn_opt: [fullsweep_after: 50])
+    GenServer.start_link(__MODULE__, args, spawn_opt: [fullsweep_after: 50])
+  rescue
+    _e in ArgumentError ->
+      {:error, :unexpected}
+  end
+
+  def start(args) do
+    # GenServer.start(__MODULE__, args, name: Mete, spawn_opt: [fullsweep_after: 50])
+    GenServer.start(__MODULE__, args, spawn_opt: [fullsweep_after: 50])
   rescue
     _e in ArgumentError ->
       {:error, :unexpected}
@@ -65,8 +74,6 @@ defmodule Mete.Connection do
 
   @impl true
   def handle_continue(:init, state) do
-    Process.flag(:trap_exit, true)
-
     unless is_nil(state.batch) do
       schedule_flush()
     end

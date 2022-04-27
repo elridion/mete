@@ -51,15 +51,12 @@ defmodule Mix.Tasks.Mete.Probe do
     end
 
     def mete do
-      pid = GenServer.whereis(Mete)
+      pid = GenServer.whereis(Mete.Scheduler)
 
       if is_pid(pid) do
-        values =
-          pid
-          |> Process.info()
-          |> Keyword.take([:heap_size, :stack_size])
+        values = GenServer.call(pid, :info)
 
-        Mete.write("mete", values)
+        Mete.write("__mete", values)
       end
     end
   end
@@ -71,6 +68,9 @@ defmodule Mix.Tasks.Mete.Probe do
   """
 
   def run(args) do
+    # Application.ensure_all_started(:mete, :permanent)
+    Mix.Task.run("app.start")
+    # Application.ensure_all_started(:logger)
     GenServer.start_link(ProbeServer, [])
     Mix.Tasks.Run.run(run_args() ++ args)
   end

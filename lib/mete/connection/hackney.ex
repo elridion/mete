@@ -17,6 +17,8 @@ if Code.ensure_loaded?(:hackney) do
       if is_binary(config.database) do
         uri = Config.uri(config)
 
+        Application.ensure_all_started(:hackney)
+
         {:ok, %__MODULE__{influx_version: 1, uri: uri}}
       else
         {:error, :database_missing}
@@ -26,6 +28,8 @@ if Code.ensure_loaded?(:hackney) do
     def init(%Config{influx_version: 2} = config) do
       if is_binary(config.bucket) and is_binary(config.organisation) and is_binary(config.token) do
         uri = Config.uri(config)
+
+        Application.ensure_all_started(:hackney)
 
         {:ok, %__MODULE__{influx_version: 2, uri: uri, token: "Token #{config.token}"}}
       else
@@ -44,7 +48,7 @@ if Code.ensure_loaded?(:hackney) do
           []
         end
 
-      :hackney.post(uri, headers, body)
+      :hackney.request(:post, uri, headers, body, [:with_body])
 
       :ok
     end
